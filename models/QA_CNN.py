@@ -70,7 +70,7 @@ class CNN(object):
   def _add_embedding(self):
     with tf.device('/cpu:0'), tf.variable_scope("word_embedding"):
       # one_hot embedding or pretrained embedding
-      if self.embeddings:
+      if self.embeddings is not None:
         self.word_embeddings = tf.get_variable(
             'word_embeddings',
             shape=(len(self.embeddings), self.embedding_size),
@@ -223,8 +223,9 @@ class CNN(object):
       self.logger.info('Train the model for epoch {}'.format(epoch))
       train_batches = data.batch_iter(data.train_set, batch_size, shuffle=True)
 
-      for batch in train_batches:
+      for e,batch in enumerate(train_batches):
         question, answer, input_y = zip(*batch)
+        print(np.array(question).shape)
 
         feed_dict = {
             self.q: question,
@@ -236,36 +237,29 @@ class CNN(object):
         _, summary, step, loss, accuracy, logits = self.sess.run([self.train_op,
                                                                   self.global_step, self.train_summary_op, self.loss, self.accuracy, self.logits], feed_dict)
         # print(logits)
-
-        self.logger.info("loss {}, acc {}".format(loss, accuracy))
+        if e % 100 == 0:
+          self.logger.info("loss {}, acc {}".format(loss, accuracy))
 
       if evaluate:
         self.logger.info('Evaluating the model after epoch {}'.format(epoch))
-        eval_batches = data.all_iter(
-            data.train_set, batch_size,)
-        scores, predictions = self.evaluate(eval_batches)
-        predict_overlap = self.predict_overlap(data=data.train_set)
-        data.train_set['scores'] = scores
-        data.train_set['overlap_score'] = predict_overlap
-        data.train_set[['id', 'scores', 'overlap_score', 'flag']].to_csv(
-            'atec_train.txt', index=None, sep='\t')
-        '''if data.dev_set is not None:
-                                  eval_batches = data.batch_iter(
-                                      data.dev_set, batch_size, shuffle=False)
+        
+        if data.dev_set is not None:
+          eval_batches = data.batch_iter(
+              data.dev_set, batch_size, shuffle=False)
 
-                                  acc, _ = self.evaluate(eval_batches)
-                                  self.logger.info('acc test:{}'.format(acc))
-                                  if acc > acc_max:
-                                    acc_max = acc
-                                    self.save(save_dir, self.args.pooling)'''
+          acc, _ = self.evaluate(eval_batches)
+          self.logger.info('acc test:{}'.format(acc))
+          if acc > acc_max:
+            acc_max = acc
+            self.save(save_dir, self.args.pooling)
 
   def evaluate(self, eval_batches, result_dir=None, result_prefix=None):
     scores = []
     predictions = []
-    qids = []
+    accs = []
 
     for batch in eval_batches:
-      question, answer, input_y= zip(*batch)
+      question, answer, input_y = zip(*batch)
 
       feed_dict = {
           self.q: question,
@@ -277,13 +271,12 @@ class CNN(object):
           [self.test_summary_op, self.global_step, self.accuracy, self.predictions, self.scores], feed_dict)
       self.test_summary_writer.add_summary(summary, step)
       # scores.append(acc)
-      scores.append(score)
+      accs.append(acc)
       predictions.extend(pred)
       # qids.extend(qid)
       # print(pred)
     # return np.mean(scores), predictions
-    print(len(scores))
-    return scores, predictions
+    return np.mean(accs), predictions
 
   def predict_overlap(self, data):
     overlap_scores = []

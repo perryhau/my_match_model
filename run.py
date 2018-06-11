@@ -28,10 +28,9 @@ def prepare(args):
   alphabet = qa_data.get_alphabet(
       [qa_data.train_set, qa_data.test_set, qa_data.dev_set])
   logger.info("the final vocab size is {}".format(len(alphabet)))
-  # embeddings = qa_data.get_embedding(args.embedding_file, alphabet, dim=100)
+  embeddings = qa_data.get_embedding(args.embedding_file, alphabet, dim=100)
 
-  # para = {'alphabet': alphabet, 'embeddings': embeddings}
-  para = {'alphabet':alphabet}
+  para = {'alphabet': alphabet, 'embeddings': embeddings}
 
   logger.info('save the embedding...')
   with open(os.path.join(args.vocab_dir, 'vocab.data'), 'wb') as fout:
@@ -52,7 +51,7 @@ def train(args):
   logger.info('initialize the model')
 
   args.alphabet_size = len(qa_data.alphabet)
-  qa_model = CNN(None, args)
+  qa_model = CNN(vocab['embeddings'], args)
   logger.info('Training the model...')
   qa_model.train(qa_data, args.num_epochs, args.batch_size, save_dir=args.model_dir,
                  dropout_keep_prob=args.dropout_keep_prob)
@@ -69,7 +68,7 @@ def evaluate(args):
   qa_data.alphabet = vocab['alphabet']
   args.max_input_left, args.max_input_right = args.max_input_left, args.max_input_right
   logger.info('restoring the model')
-  qa_model = CNN(None, args)
+  qa_model = CNN(vocab['embeddings'], args)
   qa_model.restore(args.model_dir, args.pooling)
 
   dev_batches = qa_data.batch_iter(

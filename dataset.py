@@ -61,20 +61,20 @@ class SentencePairDataset(object):
 
     embeddings = np.random.normal(0, 1, size=[len(vocab), dim])
     # word_vecs = {}
-    with open(fname) as f:
-      i = 0
-      for line in f:
-        i += 1
-        if i % 100000 == 0:
-          print ('epch %d' % i)
-        items = line.strip().split(' ')
-        if len(items) == 2:
-          vocab_size, embedding_size = items[0], items[1]
-          print (vocab_size, embedding_size)
-        else:
-          word = items[0]
-          if word in vocab:
-            embeddings[vocab[word]] = items[1:]
+    # with open(fname) as f:
+    #   i = 0
+    #   for line in f:
+    #     i += 1
+    #     if i % 100000 == 0:
+    #       print ('epch %d' % i)
+    #     items = line.strip().split(' ')
+    #     if len(items) == 2:
+    #       vocab_size, embedding_size = items[0], items[1]
+    #       print (vocab_size, embedding_size)
+    #     else:
+    #       word = items[0]
+    #       if word in vocab:
+    #         embeddings[vocab[word]] = items[1:]
     return embeddings
 
 
