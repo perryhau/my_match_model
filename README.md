@@ -2,9 +2,10 @@
 
 This is a tensorflow implementation of recent paper about question answering . It can also be treated as a sentence pair problem.
 
-[https://github.com/shuishen112/tensorflow-deep-qa]
+https://github.com/shuishen112/tensorflow-deep-qa
 
-is a implementation of Learning to [Rank Short Text Pairs with Convolutional Deep Neural Networks](http://disi.unitn.it/~severyn/papers/sigir-2015-long.pdf)
+is a implementation of Learning to 
+[Rank Short Text Pairs with Convolutional Deep Neural Networks](http://disi.unitn.it/~severyn/papers/sigir-2015-long.pdf)
 
 https://github.com/shuishen112/pairwise-deep-qa
 is a implementation of 
